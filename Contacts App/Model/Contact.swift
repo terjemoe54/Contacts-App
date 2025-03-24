@@ -27,15 +27,15 @@ class   Contact: Identifiable {
     var fullName: String {
         "\(firstName) \(lastName)"
     }
- 
+    
     init(
-         firstName: String = "",
-         lastName: String = "",
-         email: String = "",
-         phoneNumber: String = "",
-         address: String = "",
-         avatar: Data? = nil
-         
+        firstName: String = "",
+        lastName: String = "",
+        email: String = "",
+        phoneNumber: String = "",
+        address: String = "",
+        avatar: Data? = nil
+        
     ) {
         self.firstName = firstName
         self.lastName = lastName

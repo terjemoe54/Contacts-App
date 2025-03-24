@@ -10,7 +10,7 @@ import SwiftData
 
 struct ContactListView: View {
     @Environment(\.modelContext) private var modelContext
-   
+    
     // Queries
     // First name
     @Query(
@@ -24,7 +24,7 @@ struct ContactListView: View {
         order: .forward
     )
     private var contactsByLastName: [Contact]
-   
+    
     // Phone number
     @Query(
         sort: \Contact.phoneNumber,
@@ -37,6 +37,27 @@ struct ContactListView: View {
     @State private var selectedSortOrder: SortOrder = .firstName
     @State private var isSortOrderInverse: Bool = false
     @State private var isAdvancedShown: Bool = false
+    
+    
+    // Sorted Contacts
+    var sortedContacts: [Contact] {
+        let baseContacts: [Contact]
+        switch selectedSortOrder {
+        case .firstName:
+            baseContacts = contactsByFirstName
+        case .lastName:
+            baseContacts = contactsByLastName
+        case .phoneNumber:
+            baseContacts = contactsByPhoneNumber
+        }
+        return isSortOrderInverse ? baseContacts.reversed() : baseContacts
+    }
+    
+    // Filtered Contacts
+    // TODO: Implement Filtered Contacts
+    var filteredContacts: [Contact] {
+        sortedContacts
+    }
     
     var body: some View {
         NavigationStack {
@@ -56,7 +77,12 @@ struct ContactListView: View {
                     Text("TODO: Filter Picker View")
                 }
                 
-                
+                List {
+                    ForEach(filteredContacts) { contact in
+                        // TODO: ContactRowItemView
+                        Text("TODO: ContactRowItemView")
+                    }
+                }
                 Spacer()
                 
             }.navigationTitle("Contacts")
@@ -70,7 +96,7 @@ struct ContactListView: View {
                         } label: {
                             Label("Advanced", systemImage: isAdvancedShown ? "wand.and.stars" : "wand.and.stars.inverse")
                         }
-
+                        
                     }
                 }
         }
