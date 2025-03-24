@@ -18,19 +18,11 @@ struct ContactRowItemView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                // TODO: Avatar or Placeholder
-                Circle()
-                    .frame(width: 50, height: 50)
-                VStack(alignment: .leading, spacing: 5){
-                    Text(contact.fullName)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                    
-                    Text(contact.email)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    
-                }
+                
+                AvatarView(contact: contact)
+                
+                NameAndEmailView(contact: contact)
+                
             }.frame(maxWidth: .infinity, alignment: .leading)
             
             if showMore {
