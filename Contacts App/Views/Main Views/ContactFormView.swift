@@ -30,7 +30,7 @@ struct ContactFormView: View {
         contact.email.isEmpty ? .blue : .red
     }
   // Diable save button
-    var disable: Bool {
+    var disabled: Bool {
         contact.firstName.isEmpty ||
         contact.lastName.isEmpty ||
         contact.email.isEmpty ||
@@ -76,6 +76,46 @@ struct ContactFormView: View {
                         }
                     }
                 }
+                
+                Section("Optional Information") {
+                    customTextField(
+                        title: "Phone Number",
+                        hint: "Enter Phone Number",
+                        value: $contact.phoneNumber,
+                        field: .phoneNumber
+                    )
+                    .keyboardType(.phonePad)
+                    
+                    customTextField(
+                        title: "Address",
+                        hint: "Enter Address",
+                        value: $contact.address,
+                        field: .address
+                    )
+                    
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }.foregroundStyle(.red)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        contact.avatar = avatarData
+                        onSave(contact)
+                        dismiss()
+                    }
+                    .disabled(disabled)
+                }
+            }
+            .navigationTitle("Add Contact")
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                if let avatarData = contact.avatar, let uiImage = UIImage(data: avatarData) {
+                    avatarImage = Image(uiImage: uiImage)
+               }
             }
         }
     }
