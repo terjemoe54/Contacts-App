@@ -43,7 +43,41 @@ struct ContactFormView: View {
     }
     
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack {
+            Form {
+                Section("Required Information") {
+                    customTextField(
+                        title: "First Name",
+                        hint: "Enter First Name",
+                        value: $contact.firstName,
+                        field: .firstName
+                    )
+                    customTextField(
+                        title: "Last Name",
+                        hint: "Enter Last Name",
+                        value: $contact.lastName,
+                        field: .lastName
+                    )
+                    VStack(alignment: .leading, spacing: 4) {
+                        customTextField(
+                            title: "Email Address",
+                            hint: "Enter Email Address",
+                            value: $contact.email,
+                            field: .email
+                        ).keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.none)
+                        
+                        if !isEmailValid {
+                            Text(emailCaption)
+                                .foregroundStyle(emailCaptionColor)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
