@@ -94,6 +94,29 @@ struct ContactFormView: View {
                     )
                     
                 }
+                
+                Section("Avatar") {
+                    PhotosPicker(
+                        selection: $selectedImage,
+                        matching: .images,
+                        photoLibrary: .shared()
+                    ) {
+                        ZStack {
+                            AvatarView(contact: contact)
+                                .frame(
+                                    maxWidth: .infinity,
+                                    alignment: .leading)
+                            
+                            Text("Choose an Avatar")
+                                .frame(
+                                    maxWidth: .infinity,
+                                    alignment: .center)
+                        }
+                    }
+                 }
+                .onChange(of: selectedImage) { oldValue, newValue in
+                    // TODO: Load image
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
