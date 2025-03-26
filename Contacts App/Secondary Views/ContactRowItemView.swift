@@ -19,7 +19,7 @@ struct ContactRowItemView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 
-                AvatarView(contact: contact)
+                AvatarContactView(contact: contact)
                 
                 NameAndEmailView(contact: contact)
                 

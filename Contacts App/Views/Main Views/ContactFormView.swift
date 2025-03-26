@@ -19,9 +19,9 @@ struct ContactFormView: View {
         case firstName, lastName, email, phoneNumber, address
        }
     
-// TODO: isEmailValid
+
     var isEmailValid: Bool {
-        true
+        contact.email.isValidEmail() && !contact.email.isEmpty
     }
     var emailCaption: String {
         contact.email.isEmpty ? "* Email is required" : " Invalid email address"
@@ -92,9 +92,8 @@ struct ContactFormView: View {
                         value: $contact.address,
                         field: .address
                     )
-                    
-                }
-                
+                  }
+                 
                 Section("Avatar") {
                     PhotosPicker(
                         selection: $selectedImage,
@@ -102,20 +101,29 @@ struct ContactFormView: View {
                         photoLibrary: .shared()
                     ) {
                         ZStack {
-                            AvatarView(contact: contact)
-                                .frame(
-                                    maxWidth: .infinity,
-                                    alignment: .leading)
-                            
+                            AvatarView(
+                                avatarImage: avatarImage,
+                                name: contact.firstName)
+                            .frame(
+                                maxWidth: .infinity,
+                                alignment: .leading)
+                             
                             Text("Choose an Avatar")
                                 .frame(
                                     maxWidth: .infinity,
                                     alignment: .center)
                         }
                     }
+                    
+                    Button("Remove Avatar") {
+                        avatarImage = nil
+                        avatarData = nil
+                    }.foregroundStyle(.red)
+                    
+                    
                  }
-                .onChange(of: selectedImage) { oldValue, newValue in
-                    // TODO: Load image
+                .onChange(of: selectedImage) { _, newValue in
+                    loadImage(from: newValue)
                 }
             }
             .toolbar {
@@ -139,6 +147,27 @@ struct ContactFormView: View {
                 if let avatarData = contact.avatar, let uiImage = UIImage(data: avatarData) {
                     avatarImage = Image(uiImage: uiImage)
                }
+            }
+        }
+    }
+    
+    private func loadImage(from item: PhotosPickerItem?) {
+        guard let item = item else { return }
+        
+        item.loadTransferable(type: Data.self) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let data):
+                    if let data, let uiImage = UIImage(data: data) {
+                        avatarImage = Image(uiImage: uiImage)
+                        avatarData = data
+                        isImageError = false
+                    } else {
+                        isImageError = true
+                    }
+                case .failure:
+                    isImageError = false
+                }
             }
         }
     }

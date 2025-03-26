@@ -2,18 +2,16 @@
 //  AvatarView.swift
 //  Contacts App
 //
-//  Created by Terje Moe on 25/03/2025.
+//  Created by Terje Moe on 24/03/2025.
 //
 
 import SwiftUI
 
-struct AvatarView: View {
-    let avatarImage: Image?
-    let name: String
-    
+struct AvatarContactView: View {
+    let contact: Contact
     var body: some View {
-        if let avatarImage {
-            avatarImage
+        if let avatarData = contact.avatar , let uiImage = UIImage(data: avatarData){
+            Image(uiImage: uiImage)
                 .resizable()
                 .scaledToFill()
                 .frame(width: 50, height: 50)
@@ -26,7 +24,7 @@ struct AvatarView: View {
                 .fill(.blue.opacity(0.2))
                 .frame(width: 50, height: 50)
                 .overlay{
-                    Text(name.uppercased().prefix(1))
+                    Text(contact.fullName.uppercased().prefix(1))
                         .font(.largeTitle)
                         .foregroundStyle(.blue)
                         .bold()
@@ -35,4 +33,13 @@ struct AvatarView: View {
     }
 }
 
-
+#Preview {
+    AvatarContactView(contact: .init(
+        firstName: "John",
+        lastName: "Doe",
+        email: "john.doe@exaple.com",
+        phoneNumber: "123-456-7890",
+        address: "123 Main ST, Springfield, IL",
+        avatar: nil
+    ))
+}

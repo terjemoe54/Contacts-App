@@ -40,10 +40,25 @@ struct ContactListView: View {
     @State private var showMore = false
     @State private var currentContact: Contact = Contact()
     @State private var isShowingAddContactSheet = false
+    @State private var selectedFilter: Filter = .none
     
     
-    // Sorted Contacts
-    var sortedContacts: [Contact] {
+    // Filter and Predicate - Advanced Queries
+    @Query(filter: #Predicate<Contact> {
+        $0.email.contains("@example.com")
+    } ) private var contactsWithExampleDomain: [Contact]
+    
+    @Query(filter: #Predicate<Contact> {
+        !$0.phoneNumber.isEmpty
+    } ) private var contactsWithPhoneNumber: [Contact]
+    
+    @Query(filter: #Predicate<Contact> {
+        $0.lastName.starts(with: "A")
+    } ) private var contactsStartingWithA: [Contact]
+    
+    
+    // Filtered Contacts
+    var filteredContacts: [Contact] {
         let baseContacts: [Contact]
         switch selectedSortOrder {
         case .firstName:
@@ -53,60 +68,131 @@ struct ContactListView: View {
         case .phoneNumber:
             baseContacts = contactsByPhoneNumber
         }
-        return isSortOrderInverse ? baseContacts.reversed() : baseContacts
-    }
-    
-    // Filtered Contacts
-    // TODO: Implement Filtered Contacts
-    var filteredContacts: [Contact] {
-        sortedContacts
-    }
+        
+        var theFilterContacts: [Contact]
+        switch selectedFilter {
+        case .none:
+            theFilterContacts = baseContacts
+        case .examleDomain:
+            theFilterContacts = contactsWithExampleDomain
+        case .withPhoneNumber:
+            theFilterContacts = contactsWithPhoneNumber
+        case .startingWithA:
+            theFilterContacts = contactsStartingWithA
+        }
+        
+        // Reverse
+        if isSortOrderInverse {
+            theFilterContacts = theFilterContacts.reversed()
+        }
+     
+        
+        
+        
+        if searchText.isEmpty {
+            return theFilterContacts
+        } else {
+            return theFilterContacts
+                .filter { contact in
+                    contact.firstName
+                        .localizedCaseInsensitiveContains(searchText) ||
+                    
+                    contact.lastName
+                        .localizedCaseInsensitiveContains(searchText) ||
+                    
+                    contact.address
+                        .localizedCaseInsensitiveContains(searchText) ||
+                    
+                    contact.phoneNumber
+                        .localizedCaseInsensitiveContains(searchText) ||
+                    
+                    contact.email
+                        .localizedCaseInsensitiveContains(searchText)
+                    
+              }
+          }
+     }
     
     var body: some View {
         NavigationStack {
             VStack {
+               if !filteredContacts.isEmpty {
                 TextField("Search Contacts", text: $searchText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                 
-                
-                
-                SortAndToggleView(
-                    selectedSortOrder: $selectedSortOrder,
-                    isSortOrderInverse: $isSortOrderInverse
-                )
-                
-                if isAdvancedShown {
-                    Text("TODO: Filter Picker View")
-                }
-                
-                List {
-                    ForEach(filteredContacts) { contact in
-                        ContactRowItemView(
-                            contact: contact,
-                            showMore: showMore
-                        )
-                        .onTapGesture {
-                            currentContact = contact
-                            isShowingAddContactSheet.toggle()
-                            
-                        }
+                 
+                    SortAndToggleView(
+                        selectedSortOrder: $selectedSortOrder,
+                        isSortOrderInverse: $isSortOrderInverse
+                    )
+                    
+                    if isAdvancedShown {
+                        FilterPickerView(selectedFilter: $selectedFilter)
                     }
                 }
-                Spacer()
+                
+                
+                if filteredContacts.isEmpty {
+                    ContentUnavailableView("Enter a new Contact", systemImage: "person.crop.circle.badge.xmark")
+                } else {
+                    List {
+                        ForEach(filteredContacts) { contact in
+                            ContactRowItemView(
+                                contact: contact,
+                                showMore: showMore
+                            )
+                            .onTapGesture {
+                                currentContact = contact
+                                isShowingAddContactSheet.toggle()
+                                
+                            }
+                        }
+                        .onDelete { indexSet in
+                            indexSet
+                                .forEach { index in
+                                    modelContext.delete(filteredContacts[index])
+                          }
+                            do {
+                                try modelContext.save()
+                            } catch {
+                                print("Failed to save cotext after deletion \(error)")
+                            }
+                       }
+                    }
+                }
+                
                 
             }
-            .sheet(isPresented: $isShowingAddContactSheet, content: {
-                // TODO: Insert a new contact and toggle sheet and open ContactFormView
-                Text("ConactForemView")
+            .sheet(
+                isPresented: $isShowingAddContactSheet,
+                content: {
+                    ContactFormView(
+                        contact: $currentContact) { newContact in
+                            modelContext.insert(currentContact)
+                            
+                            try? modelContext.save()
+                            isShowingAddContactSheet.toggle()
+                        }
             })
             .navigationTitle("Contacts")
                 .toolbar {
+                    
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showMore.toggle()
+                        } label: {
+                            Label("Advanced", systemImage: showMore ? "text.book.closed" : "book")
+                        }
+
+                    }
+                    
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         Button {
                             isAdvancedShown.toggle()
                             if !isAdvancedShown {
                                 selectedSortOrder = .firstName
+                                selectedFilter = .none
                             }
                         } label: {
                             Label("Advanced", systemImage: isAdvancedShown ? "wand.and.stars" : "wand.and.stars.inverse")
