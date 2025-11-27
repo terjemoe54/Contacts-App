@@ -3,7 +3,7 @@
 //  Contacts App
 //
 //  Created by Terje Moe on 24/03/2025.
-//   Etter mye styr fra Tuen prøver vi igjen
+//   Etter mye styr fra Sørumsand prøver vi igjen
 // Denne bruker Swift Data
 import SwiftUI
 
